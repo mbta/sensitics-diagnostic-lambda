@@ -17,3 +17,8 @@ runs:
 
       - uses: mbta/actions/reshim-asdf@v1
       
+      - name: Install dependencies
+        run: |
+          pip install requests splunk-hec-handler awscli
+        shell: bash
+      
