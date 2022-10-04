@@ -1,0 +1,50 @@
+name: Lambda Deploy
+description: Deploys new Lambda function code
+inputs:
+aws-access-key-id:
+    description: AWS access key
+    required: true
+  aws-secret-access-key:
+    description: AWS secret key
+    required: true
+  dry-run:
+    description: >-
+      If truthy, the deploy will be a dry run, or will not be attempted at all
+      if `aws-access-key-id` is blank (instead of erroring)
+    required: false
+    default: ""
+  environment:
+    description: Name of the environment to deploy to (dev/prod)
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - uses: ./.github/actions/python_setup
+
+    - name: Create build folder
+      working-directory: src
+      run: |
+        python -m build
+        pip install --upgrade -t package dist/*.whl
+      shell: bash
+
+    - name: Create zip archive
+      working-directory: src/package
+      run: |
+        zip -r ../sensitics_sensor_monitor.zip . -x '*.pyc'
+      shell: bash
+    
+    - name: Deploy Lambda
+      working-directory: src
+      run: >-
+        aws lambda update-function-code
+        --function-name sensitics-sensor-monitor-${{ inputs.environment }}
+        --zip-file fileb://sensitics_sensor_monitor.zip
+        ${{ inputs.dry-run && '--dry-run' || '' }}
+      if: ${{ !inputs.dry-run || inputs.aws-access-key-id }}
+      shell: bash
+      env:
+        AWS_ACCESS_KEY_ID: ${{ inputs.aws-access-key-id }}
+        AWS_SECRET_ACCESS_KEY: ${{ inputs.aws-secret-access-key }}
+        AWS_REGION: us-east-1

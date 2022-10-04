@@ -1,0 +1,15 @@
+[tool.poetry]
+name = "sensitics_sensor_monitor"
+version = "0.1.0"
+description = "Request sensor diagnostics and log in Splunk"
+authors = ["MBTA CTD <developer@mbta.com>",
+           "Paul Kim <pkim@mbta.com>"]
+
+[tool.poetry.dependencies]
+python = '^3.9'
+requests = '*'
+splunk-hec-handler = '*'
+
+[build-system]
+requires = ['poetry-core~=1.0']
+build-backend = 'poetry.core.masonry.api'
