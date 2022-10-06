@@ -1,5 +1,6 @@
 import boto3
 from botocore.exceptions import ClientError
+import time
 import logging
 import os
 import sys
@@ -8,32 +9,38 @@ from splunk_hec_handler import SplunkHecHandler
 
 
 def lambda_handler(event, context):
-    print("Getting diagnostics...")
-    url = os.environ["SENSITICS_URL"]
+    logger = get_logger()
+    logger.debug("Getting diagnostics...")
 
     try:
-        response = requests.get(url, timeout=5)
+        start = time.time()
+        response = requests.get(os.environ["SENSITICS_URL"], timeout=5)
+        end = time.time()
+        logger.debug(f'Got diagnostics in {end - start} seconds')
         response.raise_for_status()
-        log_sensor_statuses(response.json()["sensors"])
+        log_sensor_statuses(response.json()["sensors"], logger)
     except requests.exceptions.HTTPError as errh:
-        print("Http Error:", errh)
+        logger.error("Http Error:", errh)
         sys.exit()
     except requests.exceptions.ConnectionError as errc:
-        print("Error Connecting:", errc)
+        logger.error("Error Connecting:", errc)
         sys.exit()
     except requests.exceptions.Timeout as errt:
-        print("Timeout Error:", errt)
+        logger.error("Timeout Error:", errt)
         sys.exit()
     except requests.exceptions.RequestException as err:
-        print("Exception:", err)
+        logger.error("Exception:", err)
         sys.exit()
 
 
-def log_sensor_statuses(sensors):
-    logger = get_logger()
-
+def log_sensor_statuses(sensors, logger):
+    logger.debug("Logging to Splunk...")
+    start = time.time()
     for sensor in sensors:
         logger.info(sensor)
+    end = time.time()
+
+    logger.debug(f'Logged in {end - start} seconds')
 
 
 def get_logger():
@@ -48,6 +55,7 @@ def get_logger():
         proto='https'
     )
     logger = logging.getLogger("SplunkHecHandler")
+    logger.setLevel(logging.DEBUG)
     logger.addHandler(splunk_handler)
 
     return logger
