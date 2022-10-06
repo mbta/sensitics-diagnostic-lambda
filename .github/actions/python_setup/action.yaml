@@ -19,6 +19,6 @@ runs:
       
       - name: Install dependencies
         run: |
-          pip install requests splunk-hec-handler awscli
+          pip install build requests splunk-hec-handler awscli
         shell: bash
       
