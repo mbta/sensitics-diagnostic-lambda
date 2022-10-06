@@ -2,10 +2,6 @@ name: Deploy Lambda to Prod
 
 on: 
   workflow_dispatch:
-  push:
-    branches: main
-    paths:
-      - 'src/**'
 
 defaults:
   run:
