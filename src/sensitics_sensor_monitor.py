@@ -43,7 +43,9 @@ def get_logger():
     splunk_handler = SplunkHecHandler(
         splunk_hec_host,
         get_splunk_token(hec_token_secret_name),
-        splunk_index,
+        index=splunk_index,
+        port=443, 
+        proto='https'
     )
     logger = logging.getLogger("SplunkHecHandler")
     logger.addHandler(splunk_handler)
