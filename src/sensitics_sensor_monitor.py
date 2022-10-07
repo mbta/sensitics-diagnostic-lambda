@@ -1,10 +1,16 @@
+"""
+This Lambda function makes a request to an endpoint provided by Sensitics to fetch diagnostics
+for Urine Detection sensors deployed in MBTA elevators and then logs the diagnostics to
+Splunk.
+"""
+
 import time
 import logging
 import os
 import sys
 import requests
-import boto3
-from botocore.exceptions import ClientError
+import boto3  # pylint: disable=E0401
+from botocore.exceptions import ClientError  # pylint: disable=E0401
 from splunk_hec_handler import SplunkHecHandler
 
 
@@ -37,7 +43,7 @@ logger.setLevel(logging.DEBUG)
 logger.addHandler(splunk_handler)
 
 
-def lambda_handler(event, context):
+def lambda_handler(event, context):  # pylint: disable=W0613
     """
     Entry point for lambda invocation via Eventbridge
     """
@@ -47,21 +53,21 @@ def lambda_handler(event, context):
         start = time.time()
         response = requests.get(os.environ["SENSITICS_URL"], timeout=5)
         end = time.time()
+        response.raise_for_status()
         request_timing_log = {"message": "Sensitics RTT", "RTT": end - start}
         logger.debug(request_timing_log)
-        response.raise_for_status()
         log_sensor_statuses(response.json()["sensors"])
     except requests.exceptions.HTTPError as errh:
-        logger.error(f"Http Error: {errh}")
+        logger.error("Http Error: %s", errh)
         sys.exit()
     except requests.exceptions.ConnectionError as errc:
-        logger.error(f"Error Connecting: {errc}")
+        logger.error("Error Connecting: %s", errc)
         sys.exit()
     except requests.exceptions.Timeout as errt:
-        logger.error(f"Timeout Error: {errt}")
+        logger.error("Timeout Error: %s", errt)
         sys.exit()
     except requests.exceptions.RequestException as err:
-        logger.error("Exception: {err}")
+        logger.error("Exception: %s", err)
         sys.exit()
 
 
@@ -76,11 +82,8 @@ def log_sensor_statuses(sensors):
         logger.info(sensor_status)
     end = time.time()
 
-    logger.debug(f"Logged to splunk in {end - start} seconds")
+    logger.debug("Logged to splunk in %s seconds", end - start)
 
 
 if __name__ == "__main__":
-    """
-    Handle command-line invocation for testing purposes.
-    """
     lambda_handler(None, None)
