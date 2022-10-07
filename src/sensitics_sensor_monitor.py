@@ -58,16 +58,20 @@ def lambda_handler(event, context):  # pylint: disable=W0613
         logger.debug(request_timing_log)
         log_sensor_statuses(response.json()["sensors"])
     except requests.exceptions.HTTPError as errh:
-        logger.error("Http Error: %s", errh)
+        log = {"type" : "Http", "exception" : errh}
+        logger.error(log)
         sys.exit()
     except requests.exceptions.ConnectionError as errc:
-        logger.error("Error Connecting: %s", errc)
+        log = {"type" : "Connection", "exception" : errc}
+        logger.error(log)
         sys.exit()
     except requests.exceptions.Timeout as errt:
-        logger.error("Timeout Error: %s", errt)
+        log = {"type" : "Timeout", "exception" : errt}
+        logger.error(log)
         sys.exit()
     except requests.exceptions.RequestException as err:
-        logger.error("Exception: %s", err)
+        log = {"type" : "Request", "exception" : err}
+        logger.error(log)
         sys.exit()
 
 
