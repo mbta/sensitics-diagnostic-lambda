@@ -83,4 +83,5 @@ if __name__ == "__main__":
     """
     Handle command-line invocation for testing purposes.
     """
+    print("blah")
     lambda_handler(None, None)
