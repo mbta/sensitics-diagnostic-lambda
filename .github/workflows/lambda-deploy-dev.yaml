@@ -2,10 +2,10 @@ name: Deploy Lambda to Dev
 
 on: 
   workflow_dispatch:
-  push:
-    branches: main
-    paths:
-      - 'src/**'
+  workflow_run:
+    workflows: ["Lambda CI"]
+    types: [completed]
+    branches: [main]
 
 defaults:
   run:
