@@ -51,10 +51,10 @@ def lambda_handler(event, context):  # pylint: disable=W0613
 
     try:
         start = time.time()
-        response = requests.get(os.environ["SENSITICS_URL"], timeout=5)
+        response = requests.get(os.environ["SENSITICS_URL"], timeout=2)
         end = time.time()
         response.raise_for_status()
-        request_timing_log = {"message": "Sensitics RTT", "RTT": end - start}
+        request_timing_log = {"message": "Sensitics RTT", "time": end - start}
         logger.debug(request_timing_log)
         log_sensor_statuses(response.json()["sensors"])
     except requests.exceptions.HTTPError as errh:
@@ -82,7 +82,8 @@ def log_sensor_statuses(sensors):
         logger.info(sensor_status)
     end = time.time()
 
-    logger.debug("Logged to splunk in %s seconds", end - start)
+    splunk_timing_log = {"message": "Log to splunk time", "time": end - start}
+    logger.debug(splunk_timing_log)
 
 
 if __name__ == "__main__":
