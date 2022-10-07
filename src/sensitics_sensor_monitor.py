@@ -51,7 +51,7 @@ def lambda_handler(event, context):  # pylint: disable=W0613
 
     try:
         start = time.time()
-        response = requests.get(os.environ["SENSITICS_URL"], timeout=2)
+        response = requests.get(os.environ["SENSITICS_URL"], timeout=5)
         end = time.time()
         response.raise_for_status()
         request_timing_log = {"message": "Sensitics RTT", "time": end - start}
