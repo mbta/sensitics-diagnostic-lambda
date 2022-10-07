@@ -10,13 +10,14 @@ from splunk_hec_handler import SplunkHecHandler
 
 def lambda_handler(event, context):
     logger = get_logger()
-    logger.debug("Getting diagnostics...")
+    print("Getting diagnostics...")
 
     try:
         start = time.time()
         response = requests.get(os.environ["SENSITICS_URL"], timeout=5)
         end = time.time()
-        logger.debug(f'Got diagnostics in {end - start} seconds')
+        request_log = {'message' : 'Sensitics RTT', 'RTT' : end - start }
+        logger.debug(request_log)
         response.raise_for_status()
         log_sensor_statuses(response.json()["sensors"], logger)
     except requests.exceptions.HTTPError as errh:
@@ -34,13 +35,14 @@ def lambda_handler(event, context):
 
 
 def log_sensor_statuses(sensors, logger):
-    logger.debug("Logging to Splunk...")
+    print("Logging to Splunk...")
     start = time.time()
-    for sensor in sensors:
-        logger.info(sensor)
+    for sensor_status in sensors:
+        sensor_status['message'] = 'Sensor info'
+        logger.info(sensor_status)
     end = time.time()
 
-    logger.debug(f'Logged in {end - start} seconds')
+    logger.debug(f'Logged to splunk in {end - start} seconds')
 
 
 def get_logger():
